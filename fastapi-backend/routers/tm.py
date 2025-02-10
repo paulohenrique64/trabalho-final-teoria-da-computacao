@@ -1,6 +1,3 @@
-
-# Maquina de turing
-
 from fastapi import APIRouter
 
 router = APIRouter()

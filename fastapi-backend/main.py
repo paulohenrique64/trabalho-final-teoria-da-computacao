@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import dfa, acp, tm
+from routers import dfa, pda, tm
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
    
@@ -14,9 +14,9 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    application.include_router(dfa.router, prefix="/dfa", tags=["deterministic finite automata"])
-    application.include_router(acp.router, prefix="/acp", tags=["acp"])
-    application.include_router(tm.router, prefix="/tm", tags=["turing machine"])    
+    application.include_router(dfa.router, prefix="/dfa", tags=["deterministic finite automata endpoints"])
+    application.include_router(pda.router, prefix="/pda", tags=["push down automata endpoints"])
+    application.include_router(tm.router, prefix="/tm", tags=["turing machine endpoints"])    
 
     return application
 

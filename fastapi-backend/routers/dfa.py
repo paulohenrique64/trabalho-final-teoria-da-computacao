@@ -1,6 +1,3 @@
-
-# automato finito deterministico -> dfa
-
 from io import BytesIO
 from typing import Dict, List
 from fastapi import APIRouter, HTTPException
@@ -10,8 +7,8 @@ from pydantic import BaseModel
 from graphviz import Digraph
 
 router = APIRouter()
-dfa_db = {}
-count = 0
+dfa_list_cache = {}
+id_counter = 0
 
 class DfaCreateRequest(BaseModel):
     states: List[str]
@@ -22,7 +19,7 @@ class DfaCreateRequest(BaseModel):
 
 @router.get("/{afd_id}")
 async def return_selected_dfa(afd_id: int):
-    dfa = dfa_db.get(afd_id)
+    dfa = dfa_list_cache.get(afd_id)
 
     if dfa is None:  # Changed from 'if not dfa'
         raise HTTPException(status_code=404, detail="selected dfa not found")
@@ -37,10 +34,9 @@ async def return_selected_dfa(afd_id: int):
     
 @router.post("/")
 async def create_dfa(request: DfaCreateRequest):
-    global count
-
-    dfa_id = count
-    count = count + 1
+    global id_counter
+    dfa_id = id_counter
+    id_counter = id_counter + 1
 
     try:
         dfa = DFA(
@@ -53,13 +49,13 @@ async def create_dfa(request: DfaCreateRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-    dfa_db[dfa_id] = dfa
+    dfa_list_cache[dfa_id] = dfa
 
     return {"id": dfa_id}
 
-@router.get("/{dfa_id}/verify")
+@router.post("/{dfa_id}/verify")
 async def verify_acceptance(dfa_id: int, word: str):
-    dfa = dfa_db.get(dfa_id)
+    dfa = dfa_list_cache.get(dfa_id)
 
     if dfa is None:  
         raise HTTPException(status_code=404, detail="selected dfa not found")
@@ -73,7 +69,7 @@ async def verify_acceptance(dfa_id: int, word: str):
 
 @router.get("/{dfa_id}/image")
 async def visualize_afd(dfa_id: int):
-    dfa = dfa_db.get(dfa_id)
+    dfa = dfa_list_cache.get(dfa_id)
 
     if dfa is None:
         raise HTTPException(status_code=404, detail="selected dfa not found")

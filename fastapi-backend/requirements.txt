@@ -1,1 +1,5 @@
+automata_lib==9.0.0
 fastapi==0.115.8
+graphviz==0.20.3
+pydantic==2.10.6
+uvicorn==0.34.0

@@ -1,14 +1,16 @@
+import base64
 from io import BytesIO
+import os
 from typing import Dict, List
+import uuid
 from fastapi import APIRouter, HTTPException
 from automata.fa.dfa import DFA
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from graphviz import Digraph
 
 router = APIRouter()
 dfa_list_cache = {}
-id_counter = 0
 
 class DfaCreateRequest(BaseModel):
     states: List[str]
@@ -17,12 +19,15 @@ class DfaCreateRequest(BaseModel):
     initial_state: str
     final_states: List[str]
 
-@router.get("/{afd_id}")
-async def return_selected_dfa(afd_id: int):
-    dfa = dfa_list_cache.get(afd_id)
+class WordRequest(BaseModel):
+    word: str
 
-    if dfa is None:  # Changed from 'if not dfa'
-        raise HTTPException(status_code=404, detail="selected dfa not found")
+@router.get("/{dfa_id}")
+async def return_selected_dfa(dfa_id: str):
+    dfa = dfa_list_cache.get(dfa_id)
+
+    if dfa is None:  
+        raise HTTPException(status_code=404, detail="o dfa selecionado nao foi encontrado")
     
     return {
         "states": dfa.states,
@@ -31,12 +36,32 @@ async def return_selected_dfa(afd_id: int):
         "initial_state": dfa.initial_state,
         "final_states": dfa.final_states,
     }
+
+@router.put("/{dfa_id}")
+async def update_dfa(dfa_id: str, request: DfaCreateRequest):
+    dfa = dfa_list_cache.get(dfa_id)
+
+    if dfa is None: 
+        raise HTTPException(status_code=404, detail="o dfa selecionado nao foi encontrado")
+
+    try:
+        dfa = DFA(
+            states=set(request.states),
+            input_symbols=set(request.input_symbols),
+            transitions=request.transitions,
+            initial_state=request.initial_state,
+            final_states=set(request.final_states)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    dfa_list_cache[dfa_id] = dfa
+
+    return {"automato finito deterministico " + dfa_id + " atualizado com sucesso"}
     
 @router.post("/")
 async def create_dfa(request: DfaCreateRequest):
-    global id_counter
-    dfa_id = id_counter
-    id_counter = id_counter + 1
+    dfa_id = str(uuid.uuid4())
 
     try:
         dfa = DFA(
@@ -54,27 +79,36 @@ async def create_dfa(request: DfaCreateRequest):
     return {"id": dfa_id}
 
 @router.post("/{dfa_id}/verify")
-async def verify_acceptance(dfa_id: int, word: str):
+async def verify_acceptance(dfa_id: str, request: WordRequest):
     dfa = dfa_list_cache.get(dfa_id)
 
+    print(request.word)
+
     if dfa is None:  
-        raise HTTPException(status_code=404, detail="selected dfa not found")
+        raise HTTPException(status_code=404, detail="o dfa selecionado nao foi encontrado")
     
     try:
-        accepted = dfa.accepts_input(word)
+        accepted = dfa.accepts_input(request.word)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
     return {"accepted": accepted}
 
-@router.get("/{dfa_id}/image")
-async def visualize_afd(dfa_id: int):
+@router.get("/{dfa_id}/save-image")
+async def save_dfa_image(dfa_id: str):
     dfa = dfa_list_cache.get(dfa_id)
 
     if dfa is None:
-        raise HTTPException(status_code=404, detail="selected dfa not found")
+        raise HTTPException(status_code=404, detail="o dfa selecionado nao foi encontrado")
     
     try:
+        # criar diretório 'images' se não existir
+        if not os.path.exists('images/dfa'):
+           os.makedirs('images/dfa')
+        
+        # nome do arquivo baseado no ID do dfa
+        filename = f"images/dfa/dfa_{dfa_id}.png"
+
         dot = Digraph()
         dot.attr(rankdir='LR')
         
@@ -94,11 +128,19 @@ async def visualize_afd(dfa_id: int):
         dot.node('', '', shape='none')
         dot.edge('', dfa.initial_state)
         
-        # render to PNG
-        buf = BytesIO()
-        buf.write(dot.pipe(format='png'))
-        buf.seek(0)
+        # salvar a imagem no arquivo
+        dot.render(filename.replace('.png', ''), format='png', cleanup=True)
+
+        # ler o arquivo e converter para base64
+        with open(filename, 'rb') as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
         
-        return StreamingResponse(buf, media_type="image/png")
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "imagem salva com sucesso",
+                "image_base64": encoded_string
+            }
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,98 @@
+
+JSON Automato finito deterministico: binarios multiplos de 3
+
+{
+  "states": ["q0", "q1", "q2"],
+  "input_symbols": ["0", "1"],
+  "transitions": {
+    "q0": {
+      "0": "q0",
+      "1": "q1"
+    },
+    "q1": {
+      "0": "q2",
+      "1": "q0"
+    },
+    "q2": {
+      "0": "q1",
+      "1": "q2"
+    }
+  },
+  "initial_state": "q0",
+  "final_states": ["q0"]
+}
+
+JSON Automato com pilha nao deterministico: palindromos
+
+{
+  "states": ["q0", "q1", "q2"],
+  "input_symbols": ["0", "1"],
+  "stack_symbols": ["0", "1", "Z"],
+  "transitions": {
+    "q0": {
+      "0": {
+        "Z": [["q0", ["0", "Z"]]],
+        "0": [["q0", ["0", "0"]]],
+        "1": [["q0", ["0", "1"]]]
+      },
+      "1": {
+        "Z": [["q0", ["1", "Z"]]],
+        "0": [["q0", ["1", "0"]]],
+        "1": [["q0", ["1", "1"]]]
+      },
+      "": {
+        "Z": [["q2", ["Z"]]],
+        "0": [["q1", ["0"]]],
+        "1": [["q1", ["1"]]]
+      }
+    },
+    "q1": {
+      "0": {
+        "0": [["q1", []]]
+      },
+      "1": {
+        "1": [["q1", []]]
+      },
+      "": {
+        "Z": [["q2", ["Z"]]]
+      }
+    }
+  },
+  "initial_state": "q0",
+  "initial_stack_symbol": "Z",
+  "final_states": ["q2"]
+}
+
+JSON Maquina de turing: numeros de 0s iguais aos numeros de 1s
+
+{
+  "states": ["q0", "q1", "q2", "q3", "qf"],
+  "input_symbols": ["0", "1"],
+  "tape_symbols": ["0", "1", "X", "Y", "*"],
+  "transitions": {
+    "q0": {
+      "0": ["q1", "X", "R"],
+      "1": ["q2", "Y", "R"],
+      "*": ["q3", "*", "R"]
+    },
+    "q1": {
+      "0": ["q1", "0", "R"],
+      "1": ["q1", "1", "R"],
+      "*": ["q2", "*", "L"]
+    },
+    "q2": {
+      "0": ["q2", "0", "L"],
+      "1": ["q2", "1", "L"],
+      "X": ["q0", "X", "R"],
+      "Y": ["q0", "Y", "R"]
+    },
+    "q3": {
+      "X": ["q3", "X", "R"],
+      "Y": ["q3", "Y", "R"],
+      "*": ["qf", "*", "R"]
+    }
+  },
+  "initial_state": "q0",
+  "blank_symbol": "*",
+  "final_states": ["qf"]
+}

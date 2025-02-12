@@ -1,14 +1,16 @@
+import base64
 from io import BytesIO
+import os
 from typing import Any, Dict, List
+import uuid
 from fastapi import APIRouter, HTTPException
 from automata.pda.npda import NPDA
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from graphviz import Digraph
 
 router = APIRouter()
 pda_list_cache = {}
-id_counter = 0
 
 class PdaCreateRequest(BaseModel):
     states: List[str]
@@ -19,8 +21,11 @@ class PdaCreateRequest(BaseModel):
     initial_stack_symbol: str
     final_states: List[str]
 
+class WordRequest(BaseModel):
+    word: str
+
 @router.get("/{pda_id}")
-async def return_selected_pda(pda_id: int):
+async def return_selected_pda(pda_id: str):
     pda = pda_list_cache.get(pda_id)
 
     if pda is None:  # Changed from 'if not pda'
@@ -33,12 +38,34 @@ async def return_selected_pda(pda_id: int):
         "initial_state": pda.initial_state,
         "final_states": pda.final_states,
     }
+
+@router.put("/{pda_id}")
+async def update_pda(pda_id: str, request: PdaCreateRequest):
+    pda = pda_list_cache.get(pda_id)
+
+    if pda is None: 
+        raise HTTPException(status_code=404, detail="o pda selecionado nao foi encontrado")
+
+    try:
+        pda = NPDA(
+            states=set(request.states),
+            input_symbols=set(request.input_symbols),
+            stack_symbols=set(request.stack_symbols),
+            transitions=request.transitions,
+            initial_state=request.initial_state,
+            initial_stack_symbol=request.initial_stack_symbol,
+            final_states=set(request.final_states)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    pda_list_cache[pda_id] = pda
+
+    return {"automato com pilha " + pda_id + " atualizado com sucesso"}
     
 @router.post("/")
 async def create_pda(request: PdaCreateRequest):
-    global id_counter
-    pda_id = id_counter
-    id_counter = id_counter + 1
+    pda_id = str(uuid.uuid4())
 
     try:
         pda = NPDA(
@@ -58,27 +85,34 @@ async def create_pda(request: PdaCreateRequest):
     return {"id": pda_id}
 
 @router.post("/{pda_id}/verify")
-async def verify_acceptance(pda_id: int, word: str):
+async def verify_acceptance(pda_id: str, request: WordRequest):
     pda = pda_list_cache.get(pda_id)
 
     if pda is None:  
         raise HTTPException(status_code=404, detail="selected pda not found")
     
     try:
-        accepted = pda.accepts_input(word)
+        accepted = pda.accepts_input(request.word)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
     return {"accepted": accepted}
 
-@router.get("/{pda_id}/image")
-async def visualize_afd(pda_id: int):
+@router.get("/{pda_id}/save-image")
+async def save_pda_image(pda_id: str):
     pda = pda_list_cache.get(pda_id)
 
     if pda is None:
         raise HTTPException(status_code=404, detail="selected pda not found")
     
     try:
+        # criar diretório 'images' se não existir
+        if not os.path.exists('images/pda'):
+           os.makedirs('images/pda')
+        
+        # nome do arquivo baseado no ID do pda
+        filename = f"images/pda/pda_{pda_id}.png"
+
         dot = Digraph()
         dot.attr(rankdir='LR')
         
@@ -102,11 +136,19 @@ async def visualize_afd(pda_id: int):
         dot.node('', '', shape='none')
         dot.edge('', pda.initial_state)
         
-        # render to PNG
-        buf = BytesIO()
-        buf.write(dot.pipe(format='png'))
-        buf.seek(0)
+        # salvar a imagem no arquivo
+        dot.render(filename.replace('.png', ''), format='png', cleanup=True)
 
-        return StreamingResponse(buf, media_type="image/png")
+        # ler o arquivo e converter para base64
+        with open(filename, 'rb') as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "imagem salva com sucesso",
+                "image_base64": encoded_string
+            }
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

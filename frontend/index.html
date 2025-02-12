@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Automatos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Simulador de Automatos</h1>
+            <p>Crie e teste diferentes tipos de automatos</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-type="dfa">DFA</button>
+            <button class="tab" data-type="pda">PDA</button>
+            <button class="tab" data-type="tm">Turing Machine</button>
+        </div>
+
+        <div class="panel">
+            <div class="input-group">
+                <label>Escreva o automato em formato JSON:</label>
+                <textarea id="automatonInput" placeholder="Escreva seu automato em formato JSON aqui..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="createBtn" type="button">Criar Automato</button>
+
+            <div class="result" id="result"></div>
+            <img id="automatonImage" class="automaton-image" style="display: none;" />
+
+            <div class="word-verify">
+                <div class="input-group">
+                    <label>Verificar se uma palavra é aceita:</label>
+                    <input type="text" id="wordInput" class="word-input" placeholder="Escreva a palavra aqui..." />
+                </div>
+                <button class="btn btn-primary" id="verifyBtn" type="button">Verificar Palavra</button>
+            </div>
+        </div>
+    </div>
+    <script src="static/index.js"></script>
+</body>
+</html>

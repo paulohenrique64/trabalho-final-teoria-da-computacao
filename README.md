@@ -1,10 +1,11 @@
-## Trabalho Teoria da Computação
+## Automata manager
 
-Simples sistema web, uma API RESTful + frontend, para gerenciar autômatos finitos determinísticos,<Br>autômatos com pilha não determinísticos e máquinas de turing.
+Um sistema web simples com uma API RESTful e um frontend para gerenciar autômatos finitos determinísticos, autômatos com pilha não determinísticos e máquinas de Turing.
 
-- Visualização gráfica dos automatos criados
-- Verificar se determinadas palavras podem ser computadas pelo automato
-- Frontend interativo para manipular os automatos
+- Trabalho da disciplina Teoria da Computação da UFLA
+- Visualização gráfica dos autômatos criados.
+- Verificação de palavras para determinar se são aceitas pelo autômato.
+- Frontend interativo para criação e teste de autômatos.
 
 ### Tecnologias utilizadas
 
@@ -25,10 +26,10 @@ Simples sistema web, uma API RESTful + frontend, para gerenciar autômatos finit
 2. Para executar o `backend`, na raiz do projeto, execute os seguintes comandos:
 
 ```bash
-python -m venv .
+python3 -m venv ./.venv
 source .venv/bin/activate
-cd fastapi-backend
-pip install
+cd backend
+pip install -r requirements.txt
 uvicorn main:app
 ```
 
@@ -52,25 +53,25 @@ uvicorn main:app
 ### Endpoints da API
 
 #### **DFA (Autômato Finito Determinístico)**
-- `POST /api/dfa/` → Cria um novo DFA  
-- `GET /api/dfa/{dfa_id}` → Obtém informações do DFA  
-- `PUT /api/dfa/{dfa_id}` → Atualiza um DFA existente  
-- `POST /api/dfa/{dfa_id}/verify` → Testa uma string no DFA  
-- `GET /api/dfa/{dfa_id}/save-image` → Gera e salva uma imagem do DFA  
+   * `POST /api/dfa/` → Cria um novo DFA  
+   * `GET /api/dfa/{dfa_id}` → Obtém informações do DFA  
+   * `PUT /api/dfa/{dfa_id}` → Atualiza um DFA existente  
+   * `POST /api/dfa/{dfa_id}/verify` → Testa uma string no DFA  
+   * `GET /api/dfa/{dfa_id}/save-image` → Gera e salva uma imagem do DFA  
 
 #### **PDA (Autômato com Pilha)**
-- `POST /api/pda/` → Cria um novo PDA  
-- `GET /api/pda/{pda_id}` → Obtém informações do PDA  
-- `PUT /api/pda/{pda_id}` → Atualiza um PDA existente  
-- `POST /api/pda/{pda_id}/verify` → Testa uma string no PDA  
-- `GET /api/pda/{pda_id}/save-image` → Gera e salva uma imagem do PDA  
+   * `POST /api/pda/` → Cria um novo PDA  
+   * `GET /api/pda/{pda_id}` → Obtém informações do PDA  
+   * `PUT /api/pda/{pda_id}` → Atualiza um PDA existente  
+   * `POST /api/pda/{pda_id}/verify` → Testa uma string no PDA  
+   * `GET /api/pda/{pda_id}/save-image` → Gera e salva uma imagem do PDA  
 
 #### **TM (Máquina de Turing)**
-- `POST /api/mt/` → Cria uma nova MT  
-- `GET /api/mt/{mt_id}` → Obtém informações da MT  
-- `PUT /api/mt/{mt_id}` → Atualiza uma MT existente  
-- `POST /api/mt/{mt_id}/verify` → Testa uma string na MT  
-- `GET /api/mt/{mt_id}/save-image` → Gera e salva uma imagem da MT  
+   * `POST /api/mt/` → Cria uma nova MT  
+   * `GET /api/mt/{mt_id}` → Obtém informações da MT  
+   * `PUT /api/mt/{mt_id}` → Atualiza uma MT existente  
+   * `POST /api/mt/{mt_id}/verify` → Testa uma string na MT  
+   * `GET /api/mt/{mt_id}/save-image` → Gera e salva uma imagem da MT  
 
 ### Exemplos de Uso
 
@@ -100,7 +101,7 @@ uvicorn main:app
 ```
 
 #### 2. Criando um automato com pilha
-* Exemplo: Cria um AP que aceita palindromos
+* Exemplo: Cria um AP que aceita palindromos pares entre 0s e 1s
 ```json
 {
   "states": ["q0", "q1", "q2"],
@@ -140,10 +141,11 @@ uvicorn main:app
   "initial_stack_symbol": "Z",
   "final_states": ["q2"]
 }
+
 ```
 
 #### 3. Criando uma MT
-* Exemplo: Cria uma máquina de turing que aceita palavras com numeros de 0s iguais aos numeros de 1s
+* Exemplo: Cria uma máquina de turing que aceita palindromos de quaisquer tamanho entre 0s e 1s
 
 ```json
 {
@@ -177,6 +179,7 @@ uvicorn main:app
   "blank_symbol": "*",
   "final_states": ["qf"]
 }
+
 ```
 
 

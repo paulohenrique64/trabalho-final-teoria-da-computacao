@@ -22,7 +22,7 @@ JSON Automato finito deterministico: binarios multiplos de 3
   "final_states": ["q0"]
 }
 
-JSON Automato com pilha nao deterministico: palindromos
+JSON Automato com pilha nao deterministico: palindromos pares entre 0s e 1s
 
 {
   "states": ["q0", "q1", "q2"],
@@ -63,7 +63,7 @@ JSON Automato com pilha nao deterministico: palindromos
   "final_states": ["q2"]
 }
 
-JSON Maquina de turing: numeros de 0s iguais aos numeros de 1s
+JSON Maquina de turing: palindromos de quaisquer tamanho entre 0s e 1s
 
 {
   "states": ["q0", "q1", "q2", "q3", "qf"],

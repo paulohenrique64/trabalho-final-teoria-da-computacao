@@ -24,7 +24,7 @@ class TmCreateRequest(BaseModel):
 class WordRequest(BaseModel):
     word: str
 
-@router.get("/{tm_id}")
+@router.get("/{tm_id}", summary="Obter uma TM")
 async def return_selected_tm(tm_id: str):
     tm = tm_list_cache.get(tm_id)
 
@@ -41,8 +41,8 @@ async def return_selected_tm(tm_id: str):
         "final_states": list(tm.final_states)
     }
 
-@router.put("/{tm_id}")
-async def utmte_tm(tm_id: str, request: TmCreateRequest):
+@router.put("/{tm_id}", summary="Atualizar uma TM")
+async def update_tm(tm_id: str, request: TmCreateRequest):
     tm = tm_list_cache.get(tm_id)
 
     if tm is None: 
@@ -65,7 +65,7 @@ async def utmte_tm(tm_id: str, request: TmCreateRequest):
 
     return {"maquina de turing " + tm_id + " atualizada com sucesso"}
     
-@router.post("/")
+@router.post("/", summary="Criar uma TM")
 async def create_tm(request: TmCreateRequest):
     tm_id = str(uuid.uuid4())
 
@@ -86,7 +86,7 @@ async def create_tm(request: TmCreateRequest):
 
     return {"id": tm_id}
 
-@router.post("/{tm_id}/verify")
+@router.post("/{tm_id}/verify", summary="Verificar aceitação de uma palavra")
 async def verify_acceptance(tm_id: str, request: WordRequest):
     tm = tm_list_cache.get(tm_id)
 
@@ -100,7 +100,7 @@ async def verify_acceptance(tm_id: str, request: WordRequest):
     
     return {"accepted": accepted}
 
-@router.get("/{tm_id}/save-image")
+@router.get("/{tm_id}/save-image", summary="Gerar imagem da TM")
 async def save_tm_image(tm_id: str):
     tm = tm_list_cache.get(tm_id)
 

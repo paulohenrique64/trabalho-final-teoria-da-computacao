@@ -24,7 +24,7 @@ class PdaCreateRequest(BaseModel):
 class WordRequest(BaseModel):
     word: str
 
-@router.get("/{pda_id}")
+@router.get("/{pda_id}", summary="Obter um PDA")
 async def return_selected_pda(pda_id: str):
     pda = pda_list_cache.get(pda_id)
 
@@ -39,7 +39,7 @@ async def return_selected_pda(pda_id: str):
         "final_states": pda.final_states,
     }
 
-@router.put("/{pda_id}")
+@router.put("/{pda_id}", summary="Atualizar um PDA")
 async def update_pda(pda_id: str, request: PdaCreateRequest):
     pda = pda_list_cache.get(pda_id)
 
@@ -63,7 +63,7 @@ async def update_pda(pda_id: str, request: PdaCreateRequest):
 
     return {"automato com pilha " + pda_id + " atualizado com sucesso"}
     
-@router.post("/")
+@router.post("/", summary="Criar um PDA")
 async def create_pda(request: PdaCreateRequest):
     pda_id = str(uuid.uuid4())
 
@@ -84,7 +84,7 @@ async def create_pda(request: PdaCreateRequest):
 
     return {"id": pda_id}
 
-@router.post("/{pda_id}/verify")
+@router.post("/{pda_id}/verify", summary="Verificar aceitação de palavra")
 async def verify_acceptance(pda_id: str, request: WordRequest):
     pda = pda_list_cache.get(pda_id)
 
@@ -98,7 +98,7 @@ async def verify_acceptance(pda_id: str, request: WordRequest):
     
     return {"accepted": accepted}
 
-@router.get("/{pda_id}/save-image")
+@router.get("/{pda_id}/save-image", summary="Gerar imagem do PDA")
 async def save_pda_image(pda_id: str):
     pda = pda_list_cache.get(pda_id)
 

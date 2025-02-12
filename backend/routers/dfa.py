@@ -22,7 +22,7 @@ class DfaCreateRequest(BaseModel):
 class WordRequest(BaseModel):
     word: str
 
-@router.get("/{dfa_id}")
+@router.get("/{dfa_id}", summary="Obter um DFA")
 async def return_selected_dfa(dfa_id: str):
     dfa = dfa_list_cache.get(dfa_id)
 
@@ -37,7 +37,7 @@ async def return_selected_dfa(dfa_id: str):
         "final_states": dfa.final_states,
     }
 
-@router.put("/{dfa_id}")
+@router.put("/{dfa_id}", summary="Atualizar um DFA")
 async def update_dfa(dfa_id: str, request: DfaCreateRequest):
     dfa = dfa_list_cache.get(dfa_id)
 
@@ -59,7 +59,7 @@ async def update_dfa(dfa_id: str, request: DfaCreateRequest):
 
     return {"automato finito deterministico " + dfa_id + " atualizado com sucesso"}
     
-@router.post("/")
+@router.post("/", summary="Criar um novo DFA")
 async def create_dfa(request: DfaCreateRequest):
     dfa_id = str(uuid.uuid4())
 
@@ -78,7 +78,7 @@ async def create_dfa(request: DfaCreateRequest):
 
     return {"id": dfa_id}
 
-@router.post("/{dfa_id}/verify")
+@router.post("/{dfa_id}/verify", summary="Verificar aceitação de palavra")
 async def verify_acceptance(dfa_id: str, request: WordRequest):
     dfa = dfa_list_cache.get(dfa_id)
 
@@ -94,7 +94,7 @@ async def verify_acceptance(dfa_id: str, request: WordRequest):
     
     return {"accepted": accepted}
 
-@router.get("/{dfa_id}/save-image")
+@router.get("/{dfa_id}/save-image", summary="Gerar imagem do DFA")
 async def save_dfa_image(dfa_id: str):
     dfa = dfa_list_cache.get(dfa_id)
 
